@@ -43,7 +43,6 @@ jobs:
       - name: Copy report to public folder
         run: |
           cp -a Samir-Ferreira/WebUI/TestReport/. public/
-          mv public/cypress-combined-report.html index.html
       
       - name: Deploy report page to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
