@@ -1,0 +1,48 @@
+name: Cypress CI
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  cypress-test:
+    name: Run on Chrome 94
+    runs-on: ubuntu-latest
+    container: cypress/browsers:node16.5.0-chrome94-ff93
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Clone project repo
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          REPO_ADDRESS: ${{ secrets.REPO_ADDRESS }}
+        run: |
+          git clone https://Samir-Ferreira:$GITLAB_TOKEN@$REPO_ADDRESS
+      
+      - name: Install depedencies and run tests
+        run: |
+          cd Samir-Ferreira/WebUI
+          npm install
+          npm run test:cli
+      
+      - name: Copy test execution videos and screenshots
+        run: |
+          mkdir public
+          cp -r Samir-Ferreira/WebUI/cypress/videos public/videos
+          cp -r Samir-Ferreira/WebUI/cypress/screenshots public/screenshots
+          
+      - name: Generate HTML report
+        run: |
+          cd Samir-Ferreira/WebUI
+          npm run create:html:report
+      
+      - name: Copy report to public folder
+        run: |
+          cp -a Samir-Ferreira/WebUI/TestReport/. public/
+          mv public/cypress-combined-report.html index.html
+      
+      - name: Deploy report page to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
